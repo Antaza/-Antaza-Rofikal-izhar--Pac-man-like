@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -15,10 +17,32 @@ public class Player : MonoBehaviour
     Camera _camera;
     [SerializeField]
     float _powerupDuration;
+    [SerializeField]
+    int Health;
+    [SerializeField]
+    TMP_Text _healthText;
+    [SerializeField]
+    Transform _respawnPoint;
 
     Rigidbody _rigidbody;
     Coroutine _powerupCoroutine;
-
+    public bool _isPowerupActive = false;
+    
+    public void Dead()
+    {
+        Health -= 1;
+        UpdateUI();
+        if (Health > 0)
+        {
+            transform.position = _respawnPoint.position;
+        }
+        else
+        {
+            Health = 0;
+            UpdateUI();
+            Debug.Log("YOU LOSE");
+        }
+    }
     public void PickPowerUp()
     {
         if (_powerupCoroutine != null)
@@ -31,6 +55,7 @@ public class Player : MonoBehaviour
 
     IEnumerator StartPowerUp()
     {
+        _isPowerupActive = true;
         if (OnpowerupStart != null)
         {
             OnpowerupStart();
@@ -39,6 +64,7 @@ public class Player : MonoBehaviour
         
         yield return new WaitForSeconds(_powerupDuration);
 
+        _isPowerupActive = false;
         if (OnpowerupStop != null)
         {
             OnpowerupStop();
@@ -48,6 +74,7 @@ public class Player : MonoBehaviour
     }
     void Awake()
     {
+        UpdateUI();
         _rigidbody = GetComponent<Rigidbody>();
         HideAndLockCursor();
     }
@@ -74,5 +101,21 @@ public class Player : MonoBehaviour
         Vector3 movementDirection = horizontalDirection + verticalDirection;
 
         _rigidbody.velocity = movementDirection * _speed * Time.deltaTime;
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        if (_isPowerupActive)
+        {
+            if (collision.gameObject.CompareTag("Enemy"))
+            {
+                collision.gameObject.GetComponent<Enemy>().Dead();
+            }
+        }
+    }
+
+    void UpdateUI()
+    {
+        _healthText.text = "Health : " + Health;
     }
 }
