@@ -5,6 +5,7 @@ using System.Runtime.CompilerServices;
 using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
 {
@@ -41,6 +42,7 @@ public class Player : MonoBehaviour
             Health = 0;
             UpdateUI();
             Debug.Log("YOU LOSE");
+            SceneManager.LoadScene("LOSE Scene");
         }
     }
     public void PickPowerUp()
